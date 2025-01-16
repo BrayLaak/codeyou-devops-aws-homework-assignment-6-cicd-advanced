@@ -1,46 +1,41 @@
-name: "Develop pipeline for RUUUUUUUuuuby"
+name: Ruby CI Pipeline
 
 on:
   push:
     branches:
       - develop
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
 jobs:
-  lint:
+  lint-test-scan:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Set Up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
-      
+
       - name: Install Dependencies
         run: bundle install
 
-      - name: Lynter
-        run: gem install rubocop && bundle exec rubocop
+      - name: Linting
+        run: bundle exec rubocop
 
-      - name: Scan for Vulns
+      - name: Vulnurability Check
         run: gem install bundler-audit && bundler-audit update && bundler-audit check
 
-      - name: Run unit tests
+      - name: Unit Tests
         run: bundle exec rspec
 
       - name: Build Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }} -t ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)
+          docker build -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) .
 
       - name: Push Docker Image
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }} ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)
-
-      
-      
+          echo ${{ secrets.DOCKER_PW }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}
+          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)

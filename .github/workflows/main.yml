@@ -1,4 +1,4 @@
-name: "All Your Pipelines Are Belong To Us"
+name: Ruby CI Pipeline
 
 on:
   push:
@@ -6,22 +6,36 @@ on:
       - main
 
 jobs:
-  lint:
+  lint-test-scan:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Set Up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
 
+      - name: Install Dependencies
+        run: bundle install
+
+      - name: Linting
+        run: bundle exec rubocop
+
+      - name: Vulnurability Check
+        run: $ bundle-audit check --update
+
+      - name: Unit Tests
+        run: bundle exec rspec
+
       - name: Build Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }}
+          docker build -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) .
 
       - name: Push Docker Image
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) ${{ secrets.DOCKER_USERNAME }}/ruby-app:${{ github.ref_name }} 
+          echo ${{ secrets.DOCKER_PW }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}
+          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)
