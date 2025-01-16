@@ -3,7 +3,7 @@ name: Ruby CI Pipeline
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   lint-test-scan:
@@ -35,9 +35,9 @@ jobs:
 
       - name: Build Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)
+          docker build -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}
 
       - name: Push Docker Image
         run: |
           echo ${{ secrets.DOCKER_PW }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
-          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD)
+          docker push ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} 
