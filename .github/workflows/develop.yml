@@ -1,0 +1,31 @@
+name: Ruby CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-test-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+
+      - name: Install Dependencies
+        run: bundle install
+
+      - name: Linting
+        run: bundle exec rubocop
+
+      - name: Vulnurability Check
+        run: $ bundle-audit check --update
+
+      - name: Unit Tests
+        run: bundle exec rspec
