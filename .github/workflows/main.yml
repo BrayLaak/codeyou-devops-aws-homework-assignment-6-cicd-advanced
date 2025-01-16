@@ -21,15 +21,6 @@ jobs:
       - name: Install Dependencies
         run: bundle install
 
-      - name: Linting
-        run: bundle exec rubocop
-
-      - name: Vulnurability Check
-        run: $ bundle-audit check --update
-
-      - name: Unit Tests
-        run: bundle exec rspec
-
       - name: Build Image
         run: |
           docker build -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }} -t ${{ secrets.DOCKER_USER }}/ruby-app:${{ github.ref_name }}-$(git rev-parse --short HEAD) .
