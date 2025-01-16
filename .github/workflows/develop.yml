@@ -25,7 +25,7 @@ jobs:
         run: bundle exec rubocop
 
       - name: Vulnurability Check
-        run: $ bundle-audit check --update
+        run: $ bundler-audit check --update
 
       - name: Unit Tests
         run: bundle exec rspec
